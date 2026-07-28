@@ -1,0 +1,8 @@
+{
+  "name": "photobooth",
+  "private": true,
+  "scripts": {
+    "test:load": "k6 run load-test.js",
+    "test:load:staged": "k6 run --out json load-test.js"
+  }
+}
