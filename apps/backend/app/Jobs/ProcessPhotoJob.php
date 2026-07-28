@@ -3,27 +3,33 @@
 namespace App\Jobs;
 
 use App\Models\Photo;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Encoders\WebpEncoder;
 
-class ProcessPhotoJob
+class ProcessPhotoJob implements ShouldQueue
 {
+    use Dispatchable, Queueable;
 
     public function __construct(
         public Photo $photo,
-        public string $imageBase64,
-    ) {}
+    ) {
+        $this->onQueue('thumbnails');
+    }
 
     public function handle(): void
     {
-        $decoded = base64_decode(explode(',', $this->imageBase64)[1] ?? $this->imageBase64);
+        $raw = Storage::disk('public')->get($this->photo->image);
+        if (!$raw) return;
 
         $thumb_path = null;
         try {
             $manager = ImageManager::usingDriver(Driver::class);
-            $thumb = $manager->decodeBinary($decoded);
+            $thumb = $manager->decodeBinary($raw);
             $thumb->scaleDown(width: 400);
 
             $baseName = pathinfo($this->photo->image, PATHINFO_FILENAME);

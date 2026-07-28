@@ -1,0 +1,4 @@
+
+Deprecated: Function imagedestroy() is deprecated since 8.5, as it has no effect since PHP 8.0 in Command line code on line 9
+PHP Deprecated:  Function imagedestroy() is deprecated since 8.5, as it has no effect since PHP 8.0 in Command line code on line 9
+UklGRpgAAABXRUJQVlA4IIwAAACQDACdASrIAMgAPm02mUmkIyKhIEgAgA2JaW7hdrEe3AAAJ7Xoq4QZBDVUmu20XCDIIaqk122i4QZBDVUmu20XCDIIaqk122i4QZBDVUmu20XCDIIaqk122i4QZBDVUmu20XCDIIaqk122izgAAP7+4U//9amRj6MX//9g7/84D/5wH9FAAAAAAAAAAA==

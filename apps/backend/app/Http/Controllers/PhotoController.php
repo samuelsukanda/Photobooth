@@ -6,9 +6,11 @@ use App\Jobs\ProcessPhotoJob;
 use App\Models\Photo;
 use App\Models\Guest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Encoders\WebpEncoder;
 
 class PhotoController extends Controller
 {
@@ -36,19 +38,33 @@ class PhotoController extends Controller
         $guest = Guest::where('token', $request->guest_token)->firstOrFail();
 
         $image_parts = explode(";base64,", $request->image);
-        $image_type_aux = explode("image/", $image_parts[0]);
-        $image_type = $image_type_aux[1];
         $image_base64 = base64_decode($image_parts[1]);
-        $file_name = 'photos/' . Str::uuid() . '.' . $image_type;
 
-        Storage::disk('public')->put($file_name, $image_base64);
+        $file_name = 'photos/' . Str::uuid() . '.webp';
+        $saved = false;
+        try {
+            $manager = ImageManager::usingDriver(Driver::class);
+            $img = $manager->decodeBinary($image_base64);
+            $img->scaleDown(width: 2000, height: 2000);
+            Storage::disk('public')->put($file_name, $img->encode(new WebpEncoder(quality: 80))->toString());
+            $saved = true;
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        if (!$saved) {
+            $image_type_aux = explode("image/", $image_parts[0]);
+            $image_type = $image_type_aux[1] ?? 'webp';
+            $file_name = 'photos/' . Str::uuid() . '.' . $image_type;
+            Storage::disk('public')->put($file_name, $image_base64);
+        }
 
         $photo = Photo::create([
             'guest_id' => $guest->id,
             'image' => $file_name,
         ]);
 
-        dispatch(new ProcessPhotoJob($photo, $request->image));
+        dispatch(new ProcessPhotoJob($photo));
 
         if ($request->has('audio') && $request->audio) {
             $audio_parts = explode(";base64,", $request->audio);
