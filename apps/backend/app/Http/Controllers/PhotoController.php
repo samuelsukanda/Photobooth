@@ -40,6 +40,11 @@ class PhotoController extends Controller
         $image_parts = explode(";base64,", $request->image);
         $image_base64 = base64_decode($image_parts[1]);
 
+        $max_size = 15 * 1024 * 1024;
+        if (strlen($image_base64) > $max_size) {
+            return response()->json(['message' => 'Ukuran foto terlalu besar. Maksimal 15MB setelah encode.'], 413);
+        }
+
         $file_name = 'photos/' . Str::uuid() . '.webp';
         $saved = false;
         try {
@@ -53,6 +58,10 @@ class PhotoController extends Controller
         }
 
         if (!$saved) {
+            $dimensions = @getimagesizefromstring($image_base64);
+            if ($dimensions && ($dimensions[0] > 4000 || $dimensions[1] > 4000)) {
+                return response()->json(['message' => 'Foto terlalu besar. Maksimal 4000px.'], 413);
+            }
             $image_type_aux = explode("image/", $image_parts[0]);
             $image_type = $image_type_aux[1] ?? 'webp';
             $file_name = 'photos/' . Str::uuid() . '.' . $image_type;

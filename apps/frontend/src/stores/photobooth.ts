@@ -13,8 +13,8 @@ export const usePhotoboothStore = defineStore('photobooth', () => {
   const audioObjectUrl = ref<string | null>(null)
 
   // ==== Frame layout constants ====
-  const PHOTO_W = 3285
-  const PHOTO_H = 3313
+  const PHOTO_W = 1200
+  const PHOTO_H = 1210
   const ORIG_FRAME_W = 15625
   const ORIG_FRAME_H = 15625
   const ORIG_CUTOUT_X = 2431
